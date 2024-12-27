@@ -3,7 +3,7 @@ import random
 
 
 class Duck(pygame.sprite.Sprite):
-    image = pygame.image.load('data/duck.png')
+    image = pygame.image.load('data/duck2.png')
 
     def __init__(self, *group):
         super().__init__(*group)
