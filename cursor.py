@@ -8,8 +8,8 @@ class Cursor(pygame.sprite.Sprite):
         super().__init__(*group)
         self.image = Cursor.image
         self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        self.rect.x = 700
+        self.rect.y = 450
 
     def update(self, *args):
         if args and args[0].type == pygame.MOUSEMOTION:
