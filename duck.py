@@ -1,5 +1,6 @@
 import pygame
 import random
+import blood
 
 width, height = 1500, 1000
 
@@ -11,6 +12,7 @@ class Duck(pygame.sprite.Sprite):
     def __init__(self,speed, *group):
         super().__init__(*group)
         self.side = random.choice([True, False])
+        self.ducks = group[0]
         self.duck_y = random.randint(30, 400)
         self.speed = speed
         self.image = Duck.image
@@ -27,6 +29,10 @@ class Duck(pygame.sprite.Sprite):
 
     def update(self):
         if self.falling:
+            group = blood.create_particles((self.rect.x, self.rect.y))
+            for member in group:
+                 self.ducks.add(member)
+            # blood.__main__()
             self.fall_speed += 1
             self.rect.y += self.fall_speed
             if self.rect.y > height:
