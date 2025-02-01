@@ -1,8 +1,96 @@
-import duck
-import cursor
-import ground
 import pygame
-import sched, time
+import random
+
+
+class Duck(pygame.sprite.Sprite):
+    image = pygame.transform.scale(pygame.image.load('data/duck.png'),
+                                   (300, 200))
+    image_dead = pygame.transform.scale(pygame.image.load('data/dead_duck.png'),
+                                        (230, 130))
+
+    def __init__(self, speed, *group):
+        super().__init__(*group)
+        self.side = random.choice([True, False])
+        self.duck_y = random.randint(30, 400)
+        self.speed = speed
+        self.image = Duck.image
+        self.rect = self.image.get_rect()
+        self.death = False
+        self.time_counter = 120
+        if self.side:
+            self.image = pygame.transform.flip(self.image, True, False)
+            self.rect.x = width + 300
+            self.rect.y = self.duck_y
+        else:
+            self.rect.x = -600
+            self.rect.y = self.duck_y
+        self.falling = False
+        self.fall_speed = 0
+
+    def update(self):
+        if self.falling:
+            self.fall_speed += 1
+            self.rect.y += self.fall_speed
+            if self.rect.y > height - 300:
+                self.falling = False
+                self.death = True
+        elif not self.falling and not self.death:
+            if self.side:
+                self.rect.x -= self.speed
+            else:
+                self.rect.x += self.speed
+            if ((not self.side and self.rect.x > width) or
+                    (self.side and self.rect.x < -600)):
+                self.despawn_duck()
+        else:
+            self.time_counter -= 1
+            if self.time_counter == 0:
+                self.kill()
+
+    def despawn_duck(self):
+        self.image = Duck.image_dead
+        self.falling = True
+        self.fall_speed = 0
+
+
+class Ground(pygame.sprite.Sprite):
+    image = pygame.image.load('data/ground.png')
+
+    def __init__(self, *group):
+        super().__init__(*group)
+        self.image = pygame.transform.scale(Ground.image, (1500, 200))
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 800
+
+
+class Cursor(pygame.sprite.Sprite):
+    ready_image = pygame.transform.scale(pygame.image.load('data/cur_ready.png'), (80, 80))
+    cd_image = pygame.transform.scale(pygame.image.load('data/cur_cd.png'),(80, 80))
+
+    def __init__(self, *group):
+        super().__init__(*group)
+        self.image = Cursor.ready_image
+        self.rect = self.image.get_rect()
+        self.rect.x = 700
+        self.rect.y = 450
+        self.ready = False
+
+    def update(self, *args):
+        if args and args[0].type == pygame.MOUSEMOTION:
+            self.rect.x = args[0].pos[0]
+            self.rect.y = args[0].pos[1]
+            if not self.ready:
+                self.image = Cursor.ready_image
+            else:
+                self.image = Cursor.cd_image
+
+    def ready(self):
+        self.ready = False
+
+    def cd(self):
+        self.ready = True
+
 
 pygame.init()
 size = width, height = 1500, 1000
@@ -10,23 +98,25 @@ screen = pygame.display.set_mode(size)
 cursor_group = pygame.sprite.Group()
 ground_group = pygame.sprite.Group()
 ducks = pygame.sprite.Group()
-cur = cursor.Cursor(cursor_group)
-ground_spr = ground.Ground(ground_group)
+cur = Cursor(cursor_group)
+ground_spr = Ground(ground_group)
 
 running = True
 fps = 60
 clock = pygame.time.Clock()
 time_counter = 0
 speed = 5
-
+cool_down = 0
 score = 0
 font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
 win_font = pygame.font.Font('data/8-BIT WONDER.TTF', 128)
 
+
 def spawn_duck():
     global speed
     speed += 0.25
-    duck.Duck(speed, ducks)
+    Duck(speed, ducks)
+
 
 while running:
     for event in pygame.event.get():
@@ -35,7 +125,9 @@ while running:
         if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
             cursor_group.update(event)
             pygame.mouse.set_visible(False)
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
+            cool_down = 40
+            Cursor.cd(cur)
             for d in ducks:
                 if d.rect.collidepoint(event.pos):
                     d.despawn_duck()
@@ -49,10 +141,9 @@ while running:
 
     score_text = font.render(str(score), True, (0, 0, 0))
     screen.blit(score_text, (width - 230, 20))
-    if score == 1000:
+    if score == 100:
         score_text = win_font.render("You win", True, (0, 0, 0))
-        screen.blit(score_text, (width -1150, 300))
-
+        screen.blit(score_text, (width - 1150, 300))
 
     if time_counter % 60 == 0:
         spawn_duck()
@@ -60,5 +151,9 @@ while running:
     pygame.display.flip()
     clock.tick(fps)
     time_counter += 1
+    if cool_down > 0:
+        cool_down -= 1
+    else:
+        Cursor.ready(cur)
 
 pygame.quit()
