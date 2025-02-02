@@ -1,5 +1,6 @@
 import pygame
 import random
+import pyautogui
 
 
 class Duck(pygame.sprite.Sprite):
@@ -31,6 +32,10 @@ class Duck(pygame.sprite.Sprite):
         if self.falling:
             self.fall_speed += 1
             self.rect.y += self.fall_speed
+            if self.side:
+                self.rect.x -= self.speed
+            else:
+                self.rect.x += self.speed
             if self.rect.y > height - 300:
                 self.falling = False
                 self.death = True
@@ -48,7 +53,11 @@ class Duck(pygame.sprite.Sprite):
                 self.kill()
 
     def despawn_duck(self):
-        self.image = Duck.image_dead
+        duck_sound.play()
+        if not self.side:
+            self.image = Duck.image_dead
+        else:
+            self.image = pygame.transform.flip(Duck.image_dead, True, False)
         self.falling = True
         self.fall_speed = 0
 
@@ -65,8 +74,10 @@ class Ground(pygame.sprite.Sprite):
 
 
 class Cursor(pygame.sprite.Sprite):
-    ready_image = pygame.transform.scale(pygame.image.load('data/cur_ready.png'), (80, 80))
-    cd_image = pygame.transform.scale(pygame.image.load('data/cur_cd.png'),(80, 80))
+    ready_image = pygame.transform.scale(
+        pygame.image.load('data/cur_ready.png'), (80, 80))
+    cd_image = pygame.transform.scale(pygame.image.load('data/cur_cd.png'),
+                                      (80, 80))
 
     def __init__(self, *group):
         super().__init__(*group)
@@ -110,6 +121,9 @@ cool_down = 0
 score = 0
 font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
 win_font = pygame.font.Font('data/8-BIT WONDER.TTF', 128)
+reload_sound = pygame.mixer.Sound('data/reloading.wav')
+shot_sound = pygame.mixer.Sound('data/shot.wav')
+duck_sound = pygame.mixer.Sound('data/duck_sound.wav')
 
 
 def spawn_duck():
@@ -126,6 +140,13 @@ while running:
             cursor_group.update(event)
             pygame.mouse.set_visible(False)
         if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
+            shot_sound.play()
+            reload_sound.play()
+            recoil_y = random.randint(30, 60)
+            recoil_x = random.randint(-30, 30)
+            pyautogui.moveRel(recoil_x, -recoil_y)
+            cur.rect.y -= recoil_y
+            cur.rect.x += recoil_x
             cool_down = 40
             Cursor.cd(cur)
             for d in ducks:
