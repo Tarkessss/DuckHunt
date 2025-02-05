@@ -114,6 +114,7 @@ ground_spr = Ground(ground_group)
 
 running = True
 fps = 60
+time = 60
 clock = pygame.time.Clock()
 time_counter = 0
 speed = 5
@@ -159,14 +160,25 @@ while running:
     ground_group.draw(screen)
     ducks.draw(screen)
     cursor_group.draw(screen)
-
+    if time < 0:
+        time_text = font.render("Time is up", True, (0, 0, 0))
+        screen.blit(time_text, (width - 1150, 300))
+        running = False
     score_text = font.render(str(score), True, (0, 0, 0))
     screen.blit(score_text, (width - 230, 20))
+    if time > 15:
+        time_text = font.render(f'{str(time)} s', True, (0, 0, 0))
+    else:
+        time_text = font.render(f'{str(time)} s', True, (255, 0, 0))
+    screen.blit(time_text, (width - 830, 20))
     if score == 100:
         score_text = win_font.render("You win", True, (0, 0, 0))
         screen.blit(score_text, (width - 1150, 300))
+        running = False
 
     if time_counter % 60 == 0:
+        time -= 1
+    if time_counter % 30 == 0:
         spawn_duck()
     ducks.update()
     pygame.display.flip()
