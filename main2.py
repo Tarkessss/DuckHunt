@@ -20,6 +20,10 @@ score = 0
 font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
 win_font = pygame.font.Font('data/8-BIT WONDER.TTF', 128)
 game_over_font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
+reload_sound = pygame.mixer.Sound('data/reloading.wav')
+shot_sound = pygame.mixer.Sound('data/shot.wav')
+duck_sound = pygame.mixer.Sound('data/duck_sound.wav')
+background_music = pygame.mixer.Sound('data/background_music.wav')
 
 def spawn_duck():
     global speed
