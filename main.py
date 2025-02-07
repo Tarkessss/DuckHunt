@@ -1,20 +1,36 @@
 import pygame
 import random
 import pyautogui
+import os
+import sys
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    # если файл не существует, то выходим
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    return image
 
 
 class Duck(pygame.sprite.Sprite):
-    image = pygame.transform.scale(pygame.image.load('data/duck.png'),
-                                   (300, 200))
     image_dead = pygame.transform.scale(pygame.image.load('data/dead_duck.png'),
                                         (230, 130))
 
-    def __init__(self, speed, *group):
-        super().__init__(*group)
+    def __init__(self, speed, sheet, columns, rows, x, y, *group):
         self.side = random.choice([True, False])
+        self.anim_time_count = 0
+        super().__init__(*group)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
         self.duck_y = random.randint(30, 400)
         self.speed = speed
-        self.image = Duck.image
         self.rect = self.image.get_rect()
         self.death = False
         self.time_counter = 120
@@ -29,6 +45,9 @@ class Duck(pygame.sprite.Sprite):
         self.fall_speed = 0
 
     def update(self):
+        if self.anim_time_count % 20 == 0 and not self.falling and not self.death:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
         if self.falling:
             self.fall_speed += 1
             self.rect.y += self.fall_speed
@@ -51,15 +70,26 @@ class Duck(pygame.sprite.Sprite):
             self.time_counter -= 1
             if self.time_counter == 0:
                 self.kill()
+        self.anim_time_count += 1
 
     def despawn_duck(self):
-        duck_sound.play()
         if not self.side:
             self.image = Duck.image_dead
         else:
             self.image = pygame.transform.flip(Duck.image_dead, True, False)
         self.falling = True
         self.fall_speed = 0
+
+    def cut_sheet(self, sheet, columns, rows):
+        if self.side:
+            sheet = self.image = pygame.transform.flip(sheet, True, False)
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
 
 
 class Ground(pygame.sprite.Sprite):
@@ -124,14 +154,14 @@ win_font = pygame.font.Font('data/8-BIT WONDER.TTF', 128)
 reload_sound = pygame.mixer.Sound('data/reloading.wav')
 shot_sound = pygame.mixer.Sound('data/shot.wav')
 duck_sound = pygame.mixer.Sound('data/duck_sound.wav')
-
+background_music = pygame.mixer.Sound('data/background_music.wav')
 
 def spawn_duck():
     global speed
     speed += 0.25
-    Duck(speed, ducks)
+    Duck(speed, load_image("duck.png"), 3, 1, 200, 200, ducks)
 
-
+background_music.play()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -153,6 +183,7 @@ while running:
                 if d.rect.collidepoint(event.pos):
                     d.despawn_duck()
                     score += 1
+                    duck_sound.play()
                     break
 
     screen.fill('lightblue')
