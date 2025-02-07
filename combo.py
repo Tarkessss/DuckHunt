@@ -42,7 +42,7 @@ def save_score(score, mode):
     conn.close()
 
 
-def get_top_scores(mode, limit=3):
+def get_top_scores(mode, limit=1):
     conn = sqlite3.connect('scores.db')
     c = conn.cursor()
     c.execute(
@@ -71,13 +71,14 @@ Chocolate = (210, 105, 30)
 LightCyan = (224, 255, 255)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Многооконное приложение")
-background = pygame.image.load("data/ground.png")
-start_button = pygame.Rect(500, 300, 300, 100)
-mode1_button = pygame.Rect(500, 130, 340, 110)
-mode2_button = pygame.Rect(500, 260, 340, 110)
-mode3_button = pygame.Rect(500, 390, 340, 110)
-finish_button = pygame.Rect(800, 500, 300, 100)
-back_to_first_button = pygame.Rect(1000, 500, 240, 80)
+background = pygame.image.load("data/fon1.png")
+background1 = pygame.image.load("data/fon22.png")
+start_button = pygame.Rect(350, 700, 800, 100)
+mode1_button = pygame.Rect(100, 650, 340, 110)
+mode2_button = pygame.Rect(500, 650, 500, 110)
+mode3_button = pygame.Rect(1070, 650, 340, 110)
+finish_button = pygame.Rect(900, 500, 300, 100)
+back_to_first_button = pygame.Rect(625, 910, 240, 80)
 exit_to_lobby_button = pygame.Rect(1200, 900, 250, 90)
 
 
@@ -100,7 +101,7 @@ def first_window():
                 if start_button.collidepoint(event.pos):
                     second_window()
         screen.blit(background, (0, 0))
-        draw_button(screen, start_button, GREEN, BLACK, "СТАРТ")
+        draw_button(screen, start_button, RED, BLACK, "СТАРТ")
         pygame.display.flip()
 
 
@@ -119,20 +120,20 @@ def second_window():
                     third_window(mode=3)
                 if back_to_first_button.collidepoint(event.pos):
                     first_window()
-        screen.fill(WHITE)
-        draw_button(screen, mode1_button, RED, LightCyan, "Режим 1")
-        draw_button(screen, mode2_button, BLUE, LightCyan, "Режим 2")
-        draw_button(screen, mode3_button, GREEN, LightCyan, "Режим 3")
+        screen.blit(background1, (0, 0))
+        draw_button(screen, mode1_button, RED, LightCyan, "Песочница")
+        draw_button(screen, mode2_button, BLUE, LightCyan, "Не пропусти ни одной")
+        draw_button(screen, mode3_button, GREEN, LightCyan, "На время")
         draw_button(screen, back_to_first_button, RED, WHITE, "Назад")
         mode1_scores = get_top_scores(mode=1)
         mode2_scores = get_top_scores(mode=2)
         mode3_scores = get_top_scores(mode=3)
         font = pygame.font.Font(None, 36)
-        score_text1 = font.render("Режим 1 Рекорды: " + str(mode1_scores), True,
+        score_text1 = font.render("Песочница рекорд: " + str(mode1_scores), True,
                                   (0, 0, 0))
-        score_text2 = font.render("Режим 2 Рекорды: " + str(mode2_scores), True,
+        score_text2 = font.render("Не пропусти ни одной : " + str(mode2_scores), True,
                                   (0, 0, 0))
-        score_text3 = font.render("Режим 3 Рекорды: " + str(mode3_scores), True,
+        score_text3 = font.render("На время рекорды: " + str(mode3_scores), True,
                                   (0, 0, 0))
         screen.blit(score_text1, (WIDTH - 400, 20))
         screen.blit(score_text2, (WIDTH - 400, 60))
@@ -159,6 +160,7 @@ def third_window(mode):
     font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
     win_font = pygame.font.Font('data/8-BIT WONDER.TTF', 128)
     game_over_font = pygame.font.Font('data/8-BIT WONDER.TTF', 74)
+    game_over_font2 = pygame.font.Font('data/8-BIT WONDER.TTF', 55)
     reload_sound = pygame.mixer.Sound('data/reloading.wav')
     shot_sound = pygame.mixer.Sound('data/shot.wav')
     duck_sound = pygame.mixer.Sound('data/duck_sound.wav')
@@ -357,11 +359,11 @@ def third_window(mode):
                 time_text = font.render(str(time), True, (255, 0, 0))
                 screen.blit(time_text, (width - 830, 20))
             if time <= 0:
-                game_over_text = game_over_font.render("Time is up", True,
+                game_over_text = game_over_font2.render("Time is up your score "+str(score), True,
                                                        (255, 0, 0))
                 screen.fill('lightblue')
                 screen.blit(game_over_text,
-                            (WIDTH // 2 - 325, HEIGHT // 2 - 100))
+                            (WIDTH // 2 - 500, HEIGHT // 2 - 100))
                 save_score(score, mode)
                 draw_button(screen, exit_to_lobby_button, GREEN, BLACK,
                             "Выход ")
