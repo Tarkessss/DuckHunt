@@ -2,7 +2,7 @@ import pygame
 import sys
 import sqlite3
 import random
-# import pyautogui
+import pyautogui
 import os
 import sys
 from duck import Duck
@@ -10,14 +10,15 @@ from duck2 import Duck2
 from cursor import Cursor
 from ground import Ground
 
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
-    # если файл не существует, то выходим
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
     image = pygame.image.load(fullname)
     return image
+
 
 def init_db():
     conn = sqlite3.connect('scores.db')
@@ -43,7 +44,9 @@ def save_score(score, mode):
 def get_top_scores(mode, limit=3):
     conn = sqlite3.connect('scores.db')
     c = conn.cursor()
-    c.execute('SELECT score FROM scores WHERE mode = ? ORDER BY score DESC LIMIT ?', (mode, limit))
+    c.execute(
+        'SELECT score FROM scores WHERE mode = ? ORDER BY score DESC LIMIT ?',
+        (mode, limit))
     scores = c.fetchall()
     conn.close()
     return [s[0] for s in scores]
@@ -124,9 +127,12 @@ def second_window():
         mode2_scores = get_top_scores(mode=2)
         mode3_scores = get_top_scores(mode=3)
         font = pygame.font.Font(None, 36)
-        score_text1 = font.render("Режим 1 Рекорды: " + str(mode1_scores), True, (0, 0, 0))
-        score_text2 = font.render("Режим 2 Рекорды: " + str(mode2_scores), True, (0, 0, 0))
-        score_text3 = font.render("Режим 3 Рекорды: " + str(mode3_scores), True, (0, 0, 0))
+        score_text1 = font.render("Режим 1 Рекорды: " + str(mode1_scores), True,
+                                  (0, 0, 0))
+        score_text2 = font.render("Режим 2 Рекорды: " + str(mode2_scores), True,
+                                  (0, 0, 0))
+        score_text3 = font.render("Режим 3 Рекорды: " + str(mode3_scores), True,
+                                  (0, 0, 0))
         screen.blit(score_text1, (WIDTH - 400, 20))
         screen.blit(score_text2, (WIDTH - 400, 60))
         screen.blit(score_text3, (WIDTH - 400, 100))
@@ -180,7 +186,7 @@ def third_window(mode):
                     reload_sound.play()
                     recoil_y = random.randint(30, 60)
                     recoil_x = random.randint(-30, 30)
-                    # pyautogui.moveRel(recoil_x, -recoil_y)
+                    pyautogui.moveRel(recoil_x, -recoil_y)
                     cur.rect.y -= recoil_y
                     cur.rect.x += recoil_x
                     cool_down = 40
@@ -192,6 +198,7 @@ def third_window(mode):
                             duck_sound.play()
                             break
                         if exit_to_lobby_button.collidepoint(event.pos):
+                            background_music.stop()
                             save_score(score, mode)
                             first_window()
 
@@ -230,27 +237,47 @@ def third_window(mode):
             speed += 0.25
             Duck2(speed, load_image("duck.png"), 3, 1, 200, 200, ducks)
 
+        background_music.play()
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-                if event.type == pygame.MOUSEMOTION:
+                if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                     cursor_group.update(event)
+                    pygame.mouse.set_visible(False)
                     mouse_x, mouse_y = event.pos
                     if exit_to_lobby_button.collidepoint(event.pos):
                         pygame.mouse.set_visible(True)
-                    else:
-                        pygame.mouse.set_visible(False)
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
+                    shot_sound.play()
+                    reload_sound.play()
+                    recoil_y = random.randint(30, 60)
+                    recoil_x = random.randint(-30, 30)
+                    pyautogui.moveRel(recoil_x, -recoil_y)
+                    cur.rect.y -= recoil_y
+                    cur.rect.x += recoil_x
+                    cool_down = 20
+                    Cursor.cd(cur)
                     for d in ducks:
                         if d.rect.collidepoint(event.pos):
                             d.despawn_duck()
                             score += 1
+                            duck_sound.play()
                             break
-                    if exit_to_lobby_button.collidepoint(event.pos):
-                        save_score(score, mode)
-                        first_window()
-
+                        if exit_to_lobby_button.collidepoint(event.pos):
+                            background_music.stop()
+                            save_score(score, mode)
+                            first_window()
+            if time_counter % 60 == 0:
+                spawn_duck()
+            ducks.update()
+            pygame.display.flip()
+            clock.tick(fps)
+            time_counter += 1
+            if cool_down > 0:
+                cool_down -= 1
+            else:
+                Cursor.ready(cur)
             if not game_over:
                 screen.fill('lightblue')
                 ground_group.draw(screen)
@@ -264,10 +291,8 @@ def third_window(mode):
                     save_score(score, mode)
                     top_scores = get_top_scores(mode)
                     print(f"Top Scores for mode {mode}: {top_scores}")
-                draw_button(screen, exit_to_lobby_button, GREEN, BLACK, "Выход ")
-
-                if time_counter % 60 == 0:
-                    spawn_duck()
+                draw_button(screen, exit_to_lobby_button, GREEN, BLACK,
+                            "Выход ")
 
                 ducks.update()
                 for d in ducks:
@@ -275,9 +300,11 @@ def third_window(mode):
                         game_over = True
                         break
             else:
-                game_over_text = game_over_font.render("Game Over", True, (255, 0, 0))
+                game_over_text = game_over_font.render("Game Over", True,
+                                                       (255, 0, 0))
                 screen.fill('lightblue')
-                screen.blit(game_over_text, (WIDTH // 2 - 325, HEIGHT // 2 - 100))
+                screen.blit(game_over_text,
+                            (WIDTH // 2 - 325, HEIGHT // 2 - 100))
 
             pygame.display.flip()
             clock.tick(fps)
