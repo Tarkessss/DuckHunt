@@ -5,7 +5,7 @@ import blood
 width, height = 1500, 1000
 
 
-class Duck(pygame.sprite.Sprite):
+class Duck2(pygame.sprite.Sprite):
     image = pygame.transform.scale(pygame.image.load('data/duck.png'), (300, 200))
     image_dead = pygame.transform.scale(pygame.image.load('data/dead_duck.png'), (230, 130))
 
@@ -15,7 +15,7 @@ class Duck(pygame.sprite.Sprite):
         self.duck_y = random.randint(30, 400)
         self.ducks = group[0]
         self.speed = speed
-        self.image = Duck.image
+        self.image = Duck2.image
         self.rect = self.image.get_rect()
 
         if self.side:
@@ -47,6 +47,6 @@ class Duck(pygame.sprite.Sprite):
 
 
     def despawn_duck(self):
-        self.image = Duck.image_dead
+        self.image = Duck2.image_dead
         self.falling = True
         self.fall_speed = 0
