@@ -1,10 +1,11 @@
 import pygame
-import sys
 import sqlite3
 import random
 import pyautogui
 import os
 import sys
+
+import duck
 from duck import Duck
 from duck2 import Duck2
 from cursor import Cursor
@@ -115,7 +116,7 @@ def second_window():
                 elif mode2_button.collidepoint(event.pos):
                     third_window(mode=2)
                 elif mode3_button.collidepoint(event.pos):
-                    print("Нажата кнопка Режим 3")
+                    third_window(mode=3)
                 if back_to_first_button.collidepoint(event.pos):
                     first_window()
         screen.fill(WHITE)
@@ -148,7 +149,6 @@ def third_window(mode):
     ducks = pygame.sprite.Group()
     cur = Cursor(cursor_group)
     ground_spr = Ground(ground_group)
-
     running = True
     fps = 60
     clock = pygame.time.Clock()
@@ -178,7 +178,6 @@ def third_window(mode):
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                     cursor_group.update(event)
                     pygame.mouse.set_visible(False)
-                    mouse_x, mouse_y = event.pos
                     if exit_to_lobby_button.collidepoint(event.pos):
                         pygame.mouse.set_visible(True)
                 if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
@@ -245,7 +244,6 @@ def third_window(mode):
                 if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
                     cursor_group.update(event)
                     pygame.mouse.set_visible(False)
-                    mouse_x, mouse_y = event.pos
                     if exit_to_lobby_button.collidepoint(event.pos):
                         pygame.mouse.set_visible(True)
                 if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
@@ -273,7 +271,6 @@ def third_window(mode):
             ducks.update()
             pygame.display.flip()
             clock.tick(fps)
-            time_counter += 1
             if cool_down > 0:
                 cool_down -= 1
             else:
@@ -300,16 +297,86 @@ def third_window(mode):
                         game_over = True
                         break
             else:
-                game_over_text = game_over_font.render("Game Over", True,
+                game_over_text = game_over_font.render("Game over", True,
                                                        (255, 0, 0))
                 screen.fill('lightblue')
                 screen.blit(game_over_text,
                             (WIDTH // 2 - 325, HEIGHT // 2 - 100))
+                draw_button(screen, exit_to_lobby_button, GREEN, BLACK,
+                            "Выход ")
 
             pygame.display.flip()
             clock.tick(fps)
             time_counter += 1
+    elif mode == 3:
+        def spawn_duck():
+            Duck(speed, load_image("duck.png"), 3, 1, 200, 200, ducks)
 
+        time = 60
+        background_music.play()
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEMOTION and pygame.mouse.get_focused():
+                    cursor_group.update(event)
+                    pygame.mouse.set_visible(False)
+                    if exit_to_lobby_button.collidepoint(event.pos):
+                        pygame.mouse.set_visible(True)
+                if event.type == pygame.MOUSEBUTTONDOWN and cool_down == 0:
+                    shot_sound.play()
+                    reload_sound.play()
+                    recoil_y = random.randint(30, 60)
+                    recoil_x = random.randint(-30, 30)
+                    pyautogui.moveRel(recoil_x, -recoil_y)
+                    cur.rect.y -= recoil_y
+                    cur.rect.x += recoil_x
+                    cool_down = 40
+                    Cursor.cd(cur)
+                    for d in ducks:
+                        if d.rect.collidepoint(event.pos):
+                            d.despawn_duck()
+                            score += 1
+                            duck_sound.play()
+                            break
+                        if exit_to_lobby_button.collidepoint(event.pos):
+                            background_music.stop()
+                            save_score(score, mode)
+                            first_window()
+
+            screen.fill('lightblue')
+            ground_group.draw(screen)
+            ducks.draw(screen)
+            cursor_group.draw(screen)
+            draw_button(screen, exit_to_lobby_button, GREEN, BLACK, "Выход ")
+            score_text = font.render(str(score), True, (0, 0, 0))
+            screen.blit(score_text, (width - 230, 20))
+            time_text = font.render(str(time), True, (0, 0, 0))
+            screen.blit(time_text, (width - 830, 20))
+            if time <= 15:
+                time_text = font.render(str(time), True, (255, 0, 0))
+                screen.blit(time_text, (width - 830, 20))
+            if time <= 0:
+                game_over_text = game_over_font.render("Time is up", True,
+                                                       (255, 0, 0))
+                screen.fill('lightblue')
+                screen.blit(game_over_text,
+                            (WIDTH // 2 - 325, HEIGHT // 2 - 100))
+                save_score(score, mode)
+                draw_button(screen, exit_to_lobby_button, GREEN, BLACK,
+                            "Выход ")
+
+            if time_counter % 60 == 0:
+                spawn_duck()
+                time -= 1
+            ducks.update()
+            pygame.display.flip()
+            clock.tick(fps)
+            time_counter += 1
+            if cool_down > 0:
+                cool_down -= 1
+            else:
+                Cursor.ready(cur)
     pygame.quit()
     sys.exit()
 
