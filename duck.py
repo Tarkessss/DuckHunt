@@ -1,6 +1,6 @@
 import pygame
 import random
-import blood
+
 
 width, height = 1500, 1000
 

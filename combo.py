@@ -4,8 +4,6 @@ import random
 import pyautogui
 import os
 import sys
-
-import duck
 from duck import Duck
 from duck2 import Duck2
 from cursor import Cursor
@@ -70,9 +68,10 @@ SaddleBrown = (139, 69, 19)
 Chocolate = (210, 105, 30)
 LightCyan = (224, 255, 255)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Многооконное приложение")
+pygame.display.set_caption("DUCK HUNT GAME")
 background = pygame.image.load("data/fon1.png")
 background1 = pygame.image.load("data/fon22.png")
+background3 = pygame.image.load("data/fon3.png")
 start_button = pygame.Rect(350, 700, 800, 100)
 mode1_button = pygame.Rect(100, 650, 340, 110)
 mode2_button = pygame.Rect(500, 650, 500, 110)
@@ -80,7 +79,7 @@ mode3_button = pygame.Rect(1070, 650, 340, 110)
 finish_button = pygame.Rect(900, 500, 300, 100)
 back_to_first_button = pygame.Rect(625, 910, 240, 80)
 exit_to_lobby_button = pygame.Rect(1200, 900, 250, 90)
-
+Startfont = pygame.font.Font("data/8bitwonderrusbylyajka_nominal.otf", 17)
 
 def draw_button(surface, rect, color, text_color, text):
     pygame.draw.rect(surface, SaddleBrown, rect, width=4)
@@ -128,16 +127,17 @@ def second_window():
         mode1_scores = get_top_scores(mode=1)
         mode2_scores = get_top_scores(mode=2)
         mode3_scores = get_top_scores(mode=3)
-        font = pygame.font.Font(None, 36)
-        score_text1 = font.render("Песочница рекорд: " + str(mode1_scores), True,
-                                  (0, 0, 0))
-        score_text2 = font.render("Не пропусти ни одной : " + str(mode2_scores), True,
-                                  (0, 0, 0))
-        score_text3 = font.render("На время рекорды: " + str(mode3_scores), True,
-                                  (0, 0, 0))
-        screen.blit(score_text1, (WIDTH - 400, 20))
-        screen.blit(score_text2, (WIDTH - 400, 60))
-        screen.blit(score_text3, (WIDTH - 400, 100))
+        font = pygame.font.Font("data/8bitwonderrusbylyajka_nominal.otf", 17)
+        Startfont = pygame.font.Font("data/8bitwonderrusbylyajka_nominal.otf", 17)
+        score_text1 = font.render("Песочница рекорд " + str(*mode1_scores), True,
+                                  (255, 255, 255))
+        score_text2 = font.render("Не пропусти ни одной " + str(*mode2_scores), True,
+                                  (255, 255, 255))
+        score_text3 = font.render("На время рекорд " + str(*mode3_scores), True,
+                                  (255, 255, 255))
+        screen.blit(score_text1, (WIDTH - 400, 30))
+        screen.blit(score_text2, (WIDTH - 400, 90))
+        screen.blit(score_text3, (WIDTH - 400, 150))
         pygame.display.flip()
 
 
@@ -203,7 +203,7 @@ def third_window(mode):
                             save_score(score, mode)
                             first_window()
 
-            screen.fill('lightblue')
+            screen.blit(background3, (0, 0))
             ground_group.draw(screen)
             ducks.draw(screen)
             cursor_group.draw(screen)
@@ -278,7 +278,7 @@ def third_window(mode):
             else:
                 Cursor.ready(cur)
             if not game_over:
-                screen.fill('lightblue')
+                screen.blit(background3, (0, 0))
                 ground_group.draw(screen)
                 ducks.draw(screen)
                 cursor_group.draw(screen)
@@ -346,7 +346,7 @@ def third_window(mode):
                             save_score(score, mode)
                             first_window()
 
-            screen.fill('lightblue')
+            screen.blit(background3, (0, 0))
             ground_group.draw(screen)
             ducks.draw(screen)
             cursor_group.draw(screen)
