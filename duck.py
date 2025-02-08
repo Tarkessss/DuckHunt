@@ -1,8 +1,8 @@
 import pygame
 import random
 
-
 width, height = 1500, 1000
+
 
 class Duck(pygame.sprite.Sprite):
     image_dead = pygame.transform.scale(pygame.image.load('data/dead_duck.png'),

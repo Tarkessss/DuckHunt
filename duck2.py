@@ -1,8 +1,8 @@
 import pygame
 import random
 
-
 width, height = 1500, 1000
+
 
 class Duck2(pygame.sprite.Sprite):
     image_dead = pygame.transform.scale(pygame.image.load('data/dead_duck.png'),
@@ -52,7 +52,7 @@ class Duck2(pygame.sprite.Sprite):
                 self.rect.x -= self.speed
             else:
                 self.rect.x += self.speed
-            if ((not self.side and self.rect.x > width+300) or
+            if ((not self.side and self.rect.x > width + 300) or
                     (self.side and self.rect.x < -600)):
                 self.despawn_duck()
         elif self.rect.y > height:

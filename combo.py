@@ -168,8 +168,8 @@ def third_window(mode):
 
     if mode == 1:
         def spawn_duck():
-            # global speed
-            # speed += 0.25
+            nonlocal speed
+            speed += 0.25
             Duck(speed, load_image("duck.png"), 3, 1, 200, 200, ducks)
 
         background_music.play()
@@ -312,6 +312,8 @@ def third_window(mode):
             time_counter += 1
     elif mode == 3:
         def spawn_duck():
+            nonlocal speed
+            speed += 0.25
             Duck(speed, load_image("duck.png"), 3, 1, 200, 200, ducks)
 
         time = 60

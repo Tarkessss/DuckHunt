@@ -1,5 +1,6 @@
 import pygame
 
+
 class Cursor(pygame.sprite.Sprite):
     ready_image = pygame.transform.scale(
         pygame.image.load('data/cur_ready.png'), (80, 80))
